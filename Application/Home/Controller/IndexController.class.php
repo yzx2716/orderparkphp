@@ -29,9 +29,9 @@ class IndexController extends Controller {
         
         //入库申请
         //todo 示例数据
-        $user_id = 1;
-        $park_id = 2;
-        $result = D("Order")->enterRequest($user_id, $park_id);
+//        $user_id = 1;
+//        $park_id = 2;
+//        $result = D("Order")->enterRequest($user_id, $park_id);
    
         
         
@@ -40,6 +40,10 @@ class IndexController extends Controller {
 //        $user_id = 1;
 //        $park_id = 2;
 //        $result = D("Order")->outRequest($user_id, $park_id);
+        
+        
+        $aa = D("ClientMessage")->setClientMessage();
+        echo $aa;
     }
     
 }
