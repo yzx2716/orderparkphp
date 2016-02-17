@@ -1,0 +1,4 @@
+if (!-e $request_filename) {
+	rewrite  /.*\.(jpg|jpeg|png|gif|bmp) /error.jpg last;
+	rewrite  /(.*) /index.php?$1 last;	
+}
