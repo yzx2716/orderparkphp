@@ -21,19 +21,25 @@ class IndexController extends Controller {
     }
     
     /**
-     * 扫描请求入库
-     * @todo 下一期：尽量让用户和停车场的操作傻瓜化，入库和出库的二维码一致，程序来判断是入库还是出库
-     * tip：入库和出库间隔超过24h，交于人工处理
+     * 扫描请求入库出库
      */
     public function enterOut(){
+        //根据传入字段判断出库/入库
+        
         
         //入库申请
         //todo 示例数据
         $user_id = 1;
         $park_id = 2;
-        $aa = D("Order")->enterRequest($user_id, $park_id);
+        $result = D("Order")->enterRequest($user_id, $park_id);
+   
         
-              
+        
+        //出库申请
+        //todo 示例数据
+//        $user_id = 1;
+//        $park_id = 2;
+//        $result = D("Order")->outRequest($user_id, $park_id);
     }
     
 }
