@@ -13,12 +13,17 @@ class ClientMessageModel extends Model {
      */
      public function setClientMessage(){
          //获取缓存数据
-         $time = S("time_aa");
-         if(empty($time)){
-             $time = date("H:i:s");
-             S("time_aa", $time);
+         $time_cc = S("time_cc");
+         if(empty($time_cc)){
+             $time_cc = date("H:i:s")."_cc";
+             S("time_cc", $time_cc, array("expire"=>3600));
          }
-         return $time;
+         $time_bb = S("time_bb");
+         if(empty($time_bb)){
+             $time_bb = date("H:i:s")."_bb";
+             S("time_bb", $time_bb, array("expire"=>3600));
+         }
+         return $time_cc;
      }
      
      /**
