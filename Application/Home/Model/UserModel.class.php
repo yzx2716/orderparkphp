@@ -21,6 +21,14 @@ class UserModel extends Model {
         session("user_id", $user_id);
         return $user_id;
     }
+    
+    /**
+     * 根据用户id获取用户信息
+     */
+    public function getUserInfoById($user_id, $field = '*'){
+        $info = $this->where("user_id=".$user_id)->field($field)->find();
+        return $info;
+    }
 }
 
 

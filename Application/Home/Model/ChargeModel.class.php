@@ -16,12 +16,17 @@ class ChargeModel extends Model {
     }
     
     /**
-     * 超时计费
+     * 开始计费
      */
-    public function overtimeCharge($order_id){
-        //判断是否超时
+    public function enterCharge($order_id){
         
-        //计费
+    }
+    
+    /**
+     * 完成计费
+     */
+    public function outCharge($order_id){
+        
     }
 }
 

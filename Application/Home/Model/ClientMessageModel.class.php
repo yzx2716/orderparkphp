@@ -8,28 +8,49 @@ use Think\Model;
 
 class ClientMessageModel extends Model {
     
-    /**
-     * 添加消息
-     */
-     public function setClientMessage(){
+     private $expire_time = 300;  //缓存时间
+
+
+     /**
+      * 添加消息
+      * @param type $park_id
+      * @param type $operate_id 
+      * @param type $nick_name
+      * @param type $action enter|out
+      * @param type $time
+      * @param type $msg 附加信息
+      * @return string
+      */
+     public function setClientMessage($park_id, $operate_id, $nick_name, $action, $time, $msg){
          //获取缓存数据
-         $time_cc = S("time_cc");
-         if(empty($time_cc)){
-             $time_cc = date("H:i:s")."_cc";
-             S("time_cc", $time_cc, array("expire"=>3600));
+         $cache_key = 'park_enter_out_request_'.$park_id;
+         $park_request = S($cache_key);
+         //去除超时数据
+         if(!empty($park_request)){
+             foreach ($park_request as $k=>$v){
+                 if(time() - strtotime($v['time']) > $this->expire_time){
+                     unset($park_request[$k]);
+                 }
+             }
          }
-         $time_bb = S("time_bb");
-         if(empty($time_bb)){
-             $time_bb = date("H:i:s")."_bb";
-             S("time_bb", $time_bb, array("expire"=>3600));
-         }
-         return $time_cc;
+         $park_request[$operate_id] = array('nick_name'=>$nick_name, 'action'=>$action, 'time'=>$time, 'msg'=>$msg);
+         S($cache_key, $park_request, array("expire"=>$this->expire_time));
+
+         print_r($park_request);
+         
+         return true;
      }
      
      /**
       * 获取消息
       */
-     public function getClientMessage(){
+     public function getClientMessage($park_id){
+         //获取缓存数据
+         $cache_key = 'park_enter_out_request_'.$park_id;
+         $park_request = S($cache_key);
+         if(empty($park_request)){
+             
+         }
          
      }
      

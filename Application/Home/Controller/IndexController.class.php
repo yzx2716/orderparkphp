@@ -1,8 +1,12 @@
 <?php
+/**
+ * 用户相关操作
+ */
 namespace Home\Controller;
 use Think\Controller;
 class IndexController extends Controller {
-    public function index(){
+    
+     public function index(){
      
 //        $dd = get_client_ip();
 //        echo $dd;
@@ -29,21 +33,37 @@ class IndexController extends Controller {
         
         //入库申请
         //todo 示例数据
-//        $user_id = 1;
-//        $park_id = 2;
+//        $user_id = 3;
+//        $park_id = 7;
 //        $result = D("Order")->enterRequest($user_id, $park_id);
-   
-        
+//   
+//        print_r($result);
         
         //出库申请
         //todo 示例数据
-//        $user_id = 1;
+        $user_id = 3;
+        $park_id = 7;
+        $result = D("Order")->outRequest($user_id, $park_id);
+        
+        print_r($result);
+        
+        
 //        $park_id = 2;
-//        $result = D("Order")->outRequest($user_id, $park_id);
+//        $user_id = 2;
+//        $wechat_id = 123123;
+//        $nick_name = 'aabbcc';
+//        $action = 'enter';
+//        $time = date("Y-m-d H:i:s");
+//        $msg = 'let me in';
+//        
+//        $aa = D("ClientMessage")->setClientMessage($park_id, $user_id, $wechat_id, $nick_name, $action, $time, $msg);
         
         
-        $aa = D("ClientMessage")->setClientMessage();
-        echo $aa;
+//        $park_id = 2;
+//        $bb = D("ClientMessage")->getClientMessage($park_id);
+//        print_r($bb);
+            
     }
+    
     
 }
