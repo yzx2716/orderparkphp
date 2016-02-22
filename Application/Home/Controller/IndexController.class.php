@@ -33,19 +33,19 @@ class IndexController extends Controller {
         
         //入库申请
         //todo 示例数据
-//        $user_id = 3;
-//        $park_id = 7;
-//        $result = D("Order")->enterRequest($user_id, $park_id);
-//   
-//        print_r($result);
+        $user_id = 3;
+        $park_id = 7;
+        $result = D("Order")->enterRequest($user_id, $park_id);
+   
+        print_r($result);
         
         //出库申请
         //todo 示例数据
-        $user_id = 3;
-        $park_id = 7;
-        $result = D("Order")->outRequest($user_id, $park_id);
-        
-        print_r($result);
+//        $user_id = 3;
+//        $park_id = 7;
+//        $result = D("Order")->outRequest($user_id, $park_id);
+//        
+//        print_r($result);
         
         
 //        $park_id = 2;

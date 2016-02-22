@@ -27,6 +27,7 @@ class OrderModel extends Model {
         'not_in_time' => '订单不在预约时间范围内！',
         'enter_permit' => '操作成功，欢迎光临！',
         'out_permit' => '操作成功，谢谢惠顾，期待下次再来！',
+        'enter_repeat' => '您的订单无法一天多次使用！',
         );
 
     /**
@@ -61,12 +62,14 @@ class OrderModel extends Model {
         $where['user_id'] = $user_id;
         $where['park_id'] = $park_id;
         $where['to_date'] = date("Y-m-d");
-        $where['state'] = array('in', array(1, 2)); //容错，入口可重复扫描
+ //       $where['state'] = array('in', array(1, 2)); //容错，入口可重复扫描
         $order_detail = $this->where($where)->field("order_id, day_type")->find();   
 
         //订单不存在
         if(empty($order_detail)){
             return array('state'=>0, 'msg'=>$tips['no_order']);
+        }elseif (3 == $order_detail['state']) {
+            return array('state'=>0, 'msg'=>$tips['enter_repeat']);
         }
         //时间段不符
         $time_range = $this->time_range;
@@ -76,22 +79,19 @@ class OrderModel extends Model {
         }
         
         //记录操作
-        $operate_id = D("Operate")->userOrderOperate($user_id, $park_id, $order_detail['order_id'], $tran_type, $cur_time);
+//        $operate_id = D("Operate")->userOrderOperate($user_id, $park_id, $order_detail['order_id'], $tran_type, $cur_time);
         
         //开始计费
         D("Charge")->enterCharge($order_detail['order_id']);
-        
-        //更新订单状态，一天多次不需要更新
-        if('times' != $order_detail['day_type']){
-            $save = array('state'=>2, 'upd_time'=>$cur_time);
-            $this->where("order_id=".$order_detail['order_id'])->save($save);
-        }
+        //更新订单状态
+        $save = array('state'=>2, 'upd_time'=>$cur_time);
+        $this->where("order_id=".$order_detail['order_id'])->save($save);
         
         //下发消息
         $msg = ''; //@todo 待定
         $user_info = D('User')->getUserInfoById($user_id, "wechat_id, nick_name");
         $nick_name = !empty($user_info['nick_name']) ? $user_info['nick_name'] : $user_info['wechat_id'];
-        D("ClientMessage")->setClientMessage($park_id, $operate_id, $nick_name, $tran_type, $cur_time, $msg);
+        D("ClientMessage")->setClientMessage($park_id, $order_detail['order_id'], $nick_name, $tran_type, $cur_time, $msg);
         
         return array('state'=>1, msg=>$tips['enter_permit']);
     }
@@ -118,22 +118,21 @@ class OrderModel extends Model {
         }
         
         //记录操作
-        $operate_id = D("Operate")->userOrderOperate($user_id, $park_id, $order_detail['order_id'], $tran_type, $cur_time);
+//        $operate_id = D("Operate")->userOrderOperate($user_id, $park_id, $order_detail['order_id'], $tran_type, $cur_time);
         
         //完成计费
         D("Charge")->outCharge($order_detail['order_id']);
         
-        //更新订单状态，一天多次不需要更新
-        if('times' != $order_detail['day_type']){
-            $save = array('state'=>3, 'upd_time'=>$cur_time);
-            $this->where("order_id=".$order_detail['order_id'])->save($save);
-        }
+        //更新订单状态，一天多次更新到初始状态
+        $order_state = 'times' == $order_detail['day_type'] ? 1 : 3;
+        $save = array('state'=>$order_state, 'upd_time'=>$cur_time);
+        $this->where("order_id=".$order_detail['order_id'])->save($save);
         
         //下发消息
         $msg = ''; //@todo 待定
         $user_info = D('User')->getUserInfoById($user_id, "wechat_id, nick_name");
         $nick_name = !empty($user_info['nick_name']) ? $user_info['nick_name'] : $user_info['wechat_id'];
-        D("ClientMessage")->setClientMessage($park_id, $operate_id, $nick_name, $tran_type, $cur_time, $msg);
+        D("ClientMessage")->setClientMessage($park_id, $order_detail['order_id'], $nick_name, $tran_type, $cur_time, $msg);
         
         return array('state'=>1, msg=>$tips['out_permit']);
     }
