@@ -53,7 +53,9 @@ $(function() {
 	//设置日期框的样式
 	//var style=$("<style type='text/css' src='./red-datepicker.css'></style>");
 	//$("head").append(style);
-	$.datepicker.setDefaults($.datepicker.regional['zh-CN']);
+	aa = $.datepicker.setDefaults($.datepicker.regional['zh-CN']);
+    
+    aa._hideDatepicker();
 });
 
 	  

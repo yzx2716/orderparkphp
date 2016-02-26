@@ -16,7 +16,8 @@
 $(document).ready(function() {   
            
        $('#popupDatepicker').datepicker({
-			onSelect: function(selectedDate){ //日期选择
+			onSelect: function(selectedDate, inst){ //日期选择
+               // $(this).css("color","red");
                // $.datepicker._hideDatepicker();
               //  $(this)._hideDatepicker();
                // alert(selectedDate);
@@ -26,9 +27,12 @@ $(document).ready(function() {
 //       $.datepicker.onSelect(function(abc){
 //           alert(abc);
 //       });
-//       
-//	$("body").click(function(){
-//        $('#popupDatepicker').hide();
+      $("body").click(function(){
+          $('#popupDatepicker').hide();  
+      });
+      
+//    $("a[class='ui-state-default']").click(function(){
+//        $(this).css("color", "red");
 //    })
 }); 
 </script>
