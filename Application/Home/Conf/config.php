@@ -10,8 +10,11 @@ return array(
     'DB_PORT'   => 3306, // 端口
     'DB_PREFIX' => 'op_', // 数据库表前缀 
     'DB_CHARSET'=> 'utf8', // 字符集
+    
     //@todo memcache缓存配置 线上可以暂时用file缓存
     'DATA_CACHE_TYPE' => 'Memcache',
     'MEMCACHE_HOST' => '127.0.0.1',
     'MEMCACHE_PORT'	=>	'11211',
+    
+    //
 );
