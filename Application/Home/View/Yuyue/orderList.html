@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <title>我的预约列表</title>
+    <link href="__PUBLIC__/datepicker/jquery-ui.css?__V__" rel="stylesheet">
+    <script type="text/javascript" src="__PUBLIC__/js/jquery-1.12.1.min.js?__V__"></script>
+    <script type="text/javascript" src="__PUBLIC__/js/common.js?__V__"></script>
+    <link rel="stylesheet" href="__PUBLIC__/style/weui.min.css?__V__"/>
+    <link rel="stylesheet" href="__PUBLIC__/style/common.css?__V__"/>
+</head>
+<body ontouchstart>
+<div class="title">
+    <div class="title_info">
+        <p>我的预约列表</p>
+    </div>
+    <div style="clear:both;"></div>
+</div> 
+
+<div id="order_list">
+    <foreach name="order_list" item="order" >
+        <div class="weui_cell" style="background-color:#d1e5f5;" >
+            <div class="weui_cell_bd weui_cell_primary">
+                <p><span>{$order.to_date}</span><span style="margin-left: 10px;font-size: 13px;">{$order.day_type_page}<span></p>
+                <p>{$order.park_name}</p>            
+                <p>地址：{$order.address}</p>
+            </div>
+        </div>
+    </foreach>    
+</div>
+<script type="text/javascript">
+$("#order_list .weui_cell:odd").css("background-color", "#FBF9FE");
+</script>    
+</body>
+</html>

@@ -15,14 +15,6 @@ class IndexController extends Controller {
 //        $this->display();
     }
     
-    /**
-     * 用户下单
-     */
-    public function addOrder(){
-        //判断订单是否已存在，防止订单重复
-        
-        //写入订单
-    }
     
     /**
      * 扫描请求入库出库

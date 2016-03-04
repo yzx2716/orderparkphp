@@ -1,0 +1,63 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 2016-2-29, 15:33:31
+    Author     : Administrator
+*/
+.btn_day_type {
+  font-size: 14px;
+  display: inline-block;
+  border-radius: 10px;
+  background-color: #04be02;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 3px;
+  margin: 9px 5px;
+}
+.title {
+    background-color:#87B6D9;
+    height:40px;
+    line-height: 40px;
+}
+.title_submit {
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background-color: #ef4f4f;
+    height: 36px;
+    width: 50px;
+    float: right;
+    margin: 2px 10px 2px 0;
+    font-size: 16px;
+    color: #FFFFFF;
+}
+.title_info {
+    float:left;
+    margin-left: 10px;
+}
+.btn_day_type_click {
+    background-color: #F7F7F7 !important;
+}
+.div_date_picker{
+    position:fixed;
+    margin:0 auto;
+    left:0; 
+    right:0; 
+    bottom:0;
+    width:310px;
+    z-index: 6;
+}
+#div_calendar {
+    width: 50px;
+    height: 50px;
+    background: url(./images/calendar.png) no-repeat 0 0;
+    position:fixed;
+    margin:0 auto;
+    left:0; 
+    right:0; 
+    bottom:100px;
+    z-index: 5;
+}
+
+

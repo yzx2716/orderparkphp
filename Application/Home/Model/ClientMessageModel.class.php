@@ -59,7 +59,7 @@ class ClientMessageModel extends Model {
              $park_request = array();
              //有效期以内的数据
              $where = "park_id={$park_id} and add_time>='".date("Y-m-d H:i:s", time()-$this->expire_time)."' and state=1";
-             $mes_arr = M('client_message')->where($where)->select();
+             $mes_arr = M('client_message')->where($where)->order('mes_id')->select();
              foreach ($mes_arr as $v){
                  $park_request[$v['mes_id']] = array('nick_name'=>$v['nick_name'], 'tran_type'=>$v['tran_type'], 'time'=>$v['add_time'], 'msg'=>$v['message']);
              }

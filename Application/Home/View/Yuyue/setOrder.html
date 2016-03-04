@@ -1,55 +1,108 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-<!--<title>预约{$park_name}停车位</title>-->
-<link href="__PUBLIC__/datepicker/jquery-ui.css?__V__" rel="stylesheet">
-<script type="text/javascript" src="__PUBLIC__/js/jquery-1.12.1.min.js?__V__"></script>
-<script type="text/javascript" src="__PUBLIC__/datepicker/jquery-ui.js?__V__"></script>
-<script type="text/javascript" src="__PUBLIC__/datepicker/dateinput-ch-ZN.js?__V__"></script>
-<link rel="stylesheet" href="__PUBLIC__/datepicker/red-datepicker.css?__V__">
-<link rel="stylesheet" href="__PUBLIC__/style/weui.min.css?__V__"/>
-<style type="text/css">
-    .div_date_picker{position:fixed;margin:0 auto;left:0; right:0; bottom:0;width:310px;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <!--<title>预约{$park_name}停车位</title>-->
+    <link href="__PUBLIC__/datepicker/jquery-ui.css?__V__" rel="stylesheet">
+    <script type="text/javascript" src="__PUBLIC__/js/jquery-1.12.1.min.js?__V__"></script>
+    <script type="text/javascript" src="__PUBLIC__/js/common.js?__V__"></script>
+    <script type="text/javascript" src="__PUBLIC__/datepicker/jquery-ui.js?__V__"></script>
+    <script type="text/javascript" src="__PUBLIC__/datepicker/dateinput-ch-ZN.js?__V__"></script>
+    <link rel="stylesheet" href="__PUBLIC__/datepicker/red-datepicker.css?__V__">
+    <link rel="stylesheet" href="__PUBLIC__/style/weui.min.css?__V__"/>
+    <link rel="stylesheet" href="__PUBLIC__/style/common.css?__V__"/>
+</head>
+<body ontouchstart>
+    <form method="post" action="{:U('Yuyue/doSetOrder',array('park_id'=>$park_id))}" onsubmit="return checkForm();" id="data_list_form"> 
+        <div class="title">
+            <div class="title_info">
+                <p>请选择预约时间</p>
+            </div>
+            <input type="submit" class="title_submit" value="提交">
+            <div style="clear:both;"></div>
+        </div>
+        <div id="date_list" class="weui_cells">
+<!-- cell start-->
+
+<!-- cell end-->            
+        </div>
+    </form>    
+<div id="popupDatepicker" class="div_date_picker"></div>
+<div id="div_calendar"></div>
+
 <script type="text/javascript">
 $(document).ready(function() {   
-           
+        function getNextDay(){
+            var curDate = new Date();
+            next_day = new Date(curDate.getTime() + 24*60*60*1000);  
+
+            Y = next_day.getFullYear();
+            M = (next_day.getMonth()+1 < 10 ? '0'+(next_day.getMonth()+1) : next_day.getMonth()+1);
+            D = next_day.getDate();
+            return Y+'-'+M+'-'+D;
+        } 
+        
        $('#popupDatepicker').datepicker({
-			onSelect: function(selectedDate, inst){ //日期选择
-               // $(this).css("color","red");
-               // $.datepicker._hideDatepicker();
-              //  $(this)._hideDatepicker();
-               // alert(selectedDate);
+            minDate : getNextDay(),
+			onSelect: function(selectedDate){ //日期选择
+                html = '<div id="date_'+selectedDate+'">\
+                            <div class="weui_cell" style="background-color:#d1e5f5;" >\
+                                <div class="weui_cell_bd weui_cell_primary">\
+                                    <p>'+selectedDate+'</p>\
+                                </div>\
+                                <i class="weui_icon_cancel" pid="date_'+selectedDate+'"></i>\
+                            </div>\
+                            <div style="background-color:#FBF9FE;">\
+                                <div class="weui_cell_bd weui_cell_primary">\
+                                    <input type="button" class="btn_day_type" day_type="'+selectedDate+':am" value="{$am}">\
+                                    <input type="button" class="btn_day_type btn_day_type_click" day_type="'+selectedDate+':pm" value="{$pm}">\
+                                    <input type="button" class="btn_day_type" day_type="'+selectedDate+':whole" value="{$whole}">\
+                                    <input type="button" class="btn_day_type" day_type="'+selectedDate+':times" value="{$times}">\
+                                    <input type="hidden" name="day_type[]" value="'+selectedDate+':pm">\
+                                </div>\
+                            </div>\
+                        </div>';
+                $("#date_list").append(html);        
             }
 	   }); //绑定输入框
        
-//       $.datepicker.onSelect(function(abc){
-//           alert(abc);
-//       });
-      $("body").click(function(){
-          $('#popupDatepicker').hide();  
-      });
-      
-//    $("a[class='ui-state-default']").click(function(){
-//        $(this).css("color", "red");
-//    })
+    //隐藏日历   
+    $(document).on("click", "#date_list",function(){
+        $("#popupDatepicker").hide();
+    });
+//    $("#popupDatepicker").on("click",function(e){
+//        e.stopPropagation();
+//    });
+    
+    //移除列
+    $("body").on("click",".weui_icon_cancel", function () { 
+        pid = $(this).attr("pid");
+        $("#"+pid).remove();
+    });
+    //day_time切换样式
+    $("body").on("click",".btn_day_type", function () { 
+        $(this).parent().children(".btn_day_type").removeClass("btn_day_type_click");
+        $(this).addClass("btn_day_type_click");
+        day_type = $(this).attr("day_type");
+        $(this).parent().find('input:hidden').val(day_type);
+    });
+    
+    $("#div_calendar").click(function(){
+        $("#popupDatepicker").show();
+    })
 }); 
+
+    //验证数据
+function checkForm(){
+    day_type_val = $("#date_list").find('input:hidden').val();
+    if("undefined" == typeof(day_type_val)){
+        _alert("提示", "请选择时间！");
+        return false;
+    }
+    return true;
+}
+
 </script>
-
-</head>
-<body>
-
-    
-<div style="width:60%;margin:0 auto;">
-    
-    <a href="javascript:;" class="weui_btn weui_btn_plain_default">按钮</a>
-    <a href="javascript:;" class="weui_btn weui_btn_plain_primary">按钮</a>
-
-    <a href="javascript:;" class="weui_btn weui_btn_mini weui_btn_primary">按钮</a>
-    <a href="javascript:;" class="weui_btn weui_btn_mini weui_btn_default">按钮</a>
-</div>
-
-<div id="popupDatepicker" class="div_date_picker"></div>
 </body>
 </html>

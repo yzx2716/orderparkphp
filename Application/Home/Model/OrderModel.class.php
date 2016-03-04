@@ -13,13 +13,6 @@ use Think\Model;
 class OrderModel extends Model {
     
     protected $tableName = "order";
-    //时间界限
-    private $time_range = array(
-        'am' => array('min'=>0, 'max'=>15), 
-        'pm' => array('min'=>15, 'max'=>24),
-        'whole' => array('min'=>0, 'max'=>24),
-        'times' => array('min'=>0, 'max'=>24),
-        );
     
     //提示语
     private $tips = array(
@@ -29,26 +22,10 @@ class OrderModel extends Model {
         'out_permit' => '操作成功，谢谢惠顾，期待下次再来！',
         'enter_repeat' => '您的订单无法一天多次使用！',
         );
-
-    /**
-     * 下单，单个下单
-     * @param type $user_id 用户id
-     * @param type $park_id 停车场id
-     * @param type $to_date 预约日期
-     * @param type $day_type 午别
-     * @return type
-     */
-    public function addOrder($user_id, $park_id, $to_date, $day_type){
-        $add = array();
-        $add['user_id'] = $user_id;
-        $add['park_id'] = $park_id;
-        $add['to_date'] = $to_date;
-        $add['day_type'] = $day_type;
-        $add['add_time'] = date("Y-m-d H:i:s");
-        $order_id = $this->add($add);
-        return $order_id;
-    }
     
+    //订单状态描述
+    private $state_desc = array(1=>'正常', 2=>'进行中', 3=>'已完成');
+
     /**
      * 申请入库
      */
@@ -62,19 +39,21 @@ class OrderModel extends Model {
         $where['user_id'] = $user_id;
         $where['park_id'] = $park_id;
         $where['to_date'] = date("Y-m-d");
+        $where['is_cancel'] = 0;
  //       $where['state'] = array('in', array(1, 2)); //容错，入口可重复扫描
         $order_detail = $this->where($where)->field("order_id, day_type")->find();   
 
         //订单不存在
         if(empty($order_detail)){
             return array('state'=>0, 'msg'=>$tips['no_order']);
+        //已经出库
         }elseif (3 == $order_detail['state']) {
             return array('state'=>0, 'msg'=>$tips['enter_repeat']);
         }
         //时间段不符
-        $time_range = $this->time_range;
+        $time_range = D('Park')->getParkTimeRange($park_id);
         $time_range_s = $time_range[$order_detail['day_type']];
-        if(date("H") > $time_range_s['max'] || date("H") < $time_range_s['min']){
+        if(date("H:i") > $time_range_s['max'] || date("H:i") < $time_range_s['min']){
             return array('state'=>0, 'msg'=>$tips['not_in_time']);
         }
         
@@ -110,6 +89,7 @@ class OrderModel extends Model {
         $where['park_id'] = $park_id;
         $where['to_date'] = array('elt', date("Y-m-d")); //查最近的一个单
         $where['state'] = array('in', array(2, 3)); //容错，入口可重复扫描
+        $where['is_cancel'] = 0;
         $order_detail = $this->where($where)->field("order_id, day_type, to_date")->order("order_id desc")->find();   
 
         //订单不存在
@@ -123,7 +103,7 @@ class OrderModel extends Model {
         //完成计费
         D("Charge")->outCharge($order_detail['order_id']);
         
-        //更新订单状态，一天多次更新到初始状态
+        //更新订单状态，一天多次更新到初始状态 这样有利于客户端的统计
         $order_state = 'times' == $order_detail['day_type'] ? 1 : 3;
         $save = array('state'=>$order_state, 'upd_time'=>$cur_time);
         $this->where("order_id=".$order_detail['order_id'])->save($save);
@@ -135,6 +115,70 @@ class OrderModel extends Model {
         D("ClientMessage")->setClientMessage($park_id, $order_detail['order_id'], $nick_name, $tran_type, $cur_time, $msg);
         
         return array('state'=>1, msg=>$tips['out_permit']);
+    }
+    
+    /**
+     * 用户下单
+     * 同一类型的（同一用户，park,日期，时段）订单只能有一个
+     */
+    public function addOrder($user_id, $park_id, $day_type_arr){
+        $add_all = array();
+        foreach ($day_type_arr as $v){
+            $add = array();
+            $add['user_id'] = $user_id;
+            $add['park_id'] = $park_id;
+            $info = explode(":", $v);
+            $add['to_date'] = $info[0];
+            $add['day_type'] = $info[1];
+            //判断订单是否已存在
+            $where = $add;
+            $where['is_cancel'] = 0;
+            $order_id = $this->where($where)->getField('order_id');
+            if($order_id > 0){
+                continue;
+            }
+            
+            $add['add_time'] = date("Y-m-d H:i:s");
+            $add_all[] = $add;
+        }
+        if(empty($add_all)){
+            $this->error = "订单已存在！";
+            return false;
+        }
+        return $this->addAll($add_all);
+    }
+    
+    /**
+     * 获取用户订单
+     * 有效订单，以今天为开始时间
+     */
+    public function orderList($user_id, $page=1, $psize=1000){
+        $where = array();
+        $where['user_id'] = $user_id;
+        $where['is_cancel'] = 0;
+        $where['to_date'] = array("egt", date('Y-m-d'));
+        //关于排序，不考虑既有上午，又有下午，又有全天的奇葩状况
+        $field = "park_id, to_date, day_type, state";
+        $order_list = $this->field($field)->where($where)->order("to_date")->page($page, $psize)->select(); 
+        $d_park = D('Park');
+        $state_desc = $this->state_desc;
+        foreach ($order_list as $k=>$v){
+            $time_range = $d_park->getParkTimeRangePage($v['park_id']);
+            $order_list[$k]['day_type_page'] = $time_range[$v['day_type']];
+            $order_list[$k]['state_desc'] = $state_desc[$v['state']];
+            $park_info = $d_park->getParkInfo($v['park_id'], "name, address");
+            $order_list[$k]['park_name'] = mbstr($park_info['name'], 0, 10);
+            $order_list[$k]['address'] = mbstr($park_info['address'],0, 20);
+        }
+        return $order_list;
+    }
+    
+    /**
+     * 获取历史订单
+     * @todo 当前一次获取全部，后期改为infinite滚动获取
+     */
+    public function historyOrderList($user_id){
+        
     }
 }
 
