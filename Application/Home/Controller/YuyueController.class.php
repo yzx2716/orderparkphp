@@ -66,4 +66,14 @@ class YuyueController extends Controller {
         $this->assign('order_list', $order_list);
         $this->display();
     }
+    
+    /**
+     * 取消订单
+     * ajax操作
+     */
+    public function cancelOrder(){
+        $order_id = intval($_REQUEST['order_id']);
+        $result = D('Order')->cancelOrder($order_id, $this->user_id);
+        echo json_encode($result);
+    }
 }

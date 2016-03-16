@@ -14,13 +14,11 @@
     <link rel="stylesheet" href="__PUBLIC__/style/common.css?__V__"/>
 </head>
 <body ontouchstart>
-    <form method="post" action="{:U('Yuyue/doSetOrder',array('park_id'=>$park_id))}" onsubmit="return checkForm();" id="data_list_form"> 
+    <form method="post" action="{:U('Yuyue/doSetOrder',array('park_id'=>$park_id))}" id="data_list_form"> 
         <div class="title">
-            <div class="title_info">
-                <p>请选择预约时间</p>
-            </div>
-            <input type="submit" class="title_submit" value="提交">
-            <div style="clear:both;"></div>
+            <a href="javascript:history.back();" class="title_back"> </a>
+            <p style="text-align: center">请选择预约时间</p>
+            <a href="javascript:void(0);" class="title_submit" id="list_form_submit">提交</a>
         </div>
         <div id="date_list" class="weui_cells">
 <!-- cell start-->
@@ -94,14 +92,15 @@ $(document).ready(function() {
 }); 
 
     //验证数据
-function checkForm(){
+$("#list_form_submit").click(function(){
     day_type_val = $("#date_list").find('input:hidden').val();
     if("undefined" == typeof(day_type_val)){
         _alert("提示", "请选择时间！");
         return false;
     }
-    return true;
-}
+    $("#data_list_form").submit();
+})
+
 
 </script>
 </body>

@@ -14,6 +14,9 @@ class OrderModel extends Model {
     
     protected $tableName = "order";
     
+    protected $order_append = "order_append";
+
+
     //提示语
     private $tips = array(
         'no_order' => '无今日订单，请先进行预约！',
@@ -21,6 +24,11 @@ class OrderModel extends Model {
         'enter_permit' => '操作成功，欢迎光临！',
         'out_permit' => '操作成功，谢谢惠顾，期待下次再来！',
         'enter_repeat' => '您的订单无法一天多次使用！',
+        'system_error' => '系统错误！',
+        'operate_fail' => '操作失败！',
+        'operate_success' => '操作成功!',
+        'order_used' => '订单已使用，无法取消!',
+        'order_invalid' => '无效订单！', 
         );
     
     //订单状态描述
@@ -97,22 +105,36 @@ class OrderModel extends Model {
             return array('state'=>0, 'msg'=>$tips['no_order']);
         }
         
+        $order_id = $order_detail['order_id'];
         //记录操作
 //        $operate_id = D("Operate")->userOrderOperate($user_id, $park_id, $order_detail['order_id'], $tran_type, $cur_time);
         
         //完成计费
-        D("Charge")->outCharge($order_detail['order_id']);
+        D("Charge")->outCharge($order_id);
         
         //更新订单状态，一天多次更新到初始状态 这样有利于客户端的统计
         $order_state = 'times' == $order_detail['day_type'] ? 1 : 3;
         $save = array('state'=>$order_state, 'upd_time'=>$cur_time);
-        $this->where("order_id=".$order_detail['order_id'])->save($save);
+        $upd_result = $this->where("order_id=".$order_id)->save($save);
+        if(!$upd_result){
+            return array('state'=>0, msg=>$tips['system_error']);
+        }
+        //多次使用的订单，更新使用次数
+        if('times' == $order_detail['day_type']){
+            $model_append = M($this->order_append);
+            $append_order_info = $model_append->where("order_id=".$order_id)->field('order_id, use_count')->find();
+            if(!empty($append_order_info)){
+                $model_append->where("order_id=".$order_id)->save(array('use_count'=>$append_order_info[use_count]+1, 'upd_time'=>$cur_time));
+            }else{
+                $model_append->add(array('order_id'=>$order_id, 'use_count'=>1, 'upd_time'=>$cur_time));
+            }
+        }
         
         //下发消息
         $msg = ''; //@todo 待定
         $user_info = D('User')->getUserInfoById($user_id, "wechat_id, nick_name");
         $nick_name = !empty($user_info['nick_name']) ? $user_info['nick_name'] : $user_info['wechat_id'];
-        D("ClientMessage")->setClientMessage($park_id, $order_detail['order_id'], $nick_name, $tran_type, $cur_time, $msg);
+        D("ClientMessage")->setClientMessage($park_id, $order_id, $nick_name, $tran_type, $cur_time, $msg);
         
         return array('state'=>1, msg=>$tips['out_permit']);
     }
@@ -158,7 +180,7 @@ class OrderModel extends Model {
         $where['is_cancel'] = 0;
         $where['to_date'] = array("egt", date('Y-m-d'));
         //关于排序，不考虑既有上午，又有下午，又有全天的奇葩状况
-        $field = "park_id, to_date, day_type, state";
+        $field = "order_id, park_id, to_date, day_type, state";
         $order_list = $this->field($field)->where($where)->order("to_date")->page($page, $psize)->select(); 
         $d_park = D('Park');
         $state_desc = $this->state_desc;
@@ -167,8 +189,8 @@ class OrderModel extends Model {
             $order_list[$k]['day_type_page'] = $time_range[$v['day_type']];
             $order_list[$k]['state_desc'] = $state_desc[$v['state']];
             $park_info = $d_park->getParkInfo($v['park_id'], "name, address");
-            $order_list[$k]['park_name'] = mbstr($park_info['name'], 0, 10);
-            $order_list[$k]['address'] = mbstr($park_info['address'],0, 20);
+            $order_list[$k]['park_name'] = mbstr($park_info['name'], 0, 16);
+            $order_list[$k]['address'] = mbstr($park_info['address'],0, 22);
         }
         return $order_list;
     }
@@ -179,6 +201,37 @@ class OrderModel extends Model {
      */
     public function historyOrderList($user_id){
         
+    }
+    
+    /**
+     * 取消订单
+     */
+    public function cancelOrder($order_id, $user_id){
+        $tips = $this->tips;
+        //判断订单的有效性
+        $where = array();
+        $where['order_id'] = $order_id;
+        $where['user_id'] = $user_id;
+        $where['is_cancel'] = 0;
+        $where['state'] = 1;
+        $order_info = $this->where($where)->field('day_type')->find();
+        if(empty($order_info)){
+            return array('state'=>0, 'msg'=>$tips['order_invalid']);
+        }
+        //一天多次的订单，使用过后，不允许取消
+        if('times' == $order_info['day_type']){
+            $use_count = M($this->order_append)->where(array('order_id' => $order_id))->getField('use_count');
+            if($use_count > 0){
+                return array('state'=>0, 'msg'=>$tips['order_used']);
+            }
+        }
+        //取消订单
+        $upd = $this->where(array('order_id' => $order_id))->save(array('is_cancel'=>1, 'upd_time'=>date('Y-m-d H:i:s')));
+        if($upd){
+            return array('state'=>1, 'msg'=>$tips['operate_success']);
+        }else{
+            return array('state'=>0, 'msg'=>$tips['operate_fail']);
+        }
     }
 }
 

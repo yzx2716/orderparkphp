@@ -17,25 +17,73 @@ and open the template in the editor.
   margin: 9px 5px;
 }
 .title {
-    background-color:#87B6D9;
+    background-color:#009DE4;
     height:40px;
     line-height: 40px;
+    color: #FFF;
 }
 .title_submit {
+  position: absolute;
+  right: 8px;
+  top: 0;
+  color: #FFF;
+}
+.title_back {
+    border-style: solid;
+    border-width: 0px 0px 2px 2px;
+    content: " ";
+    display: inline-block;
+    height: 10px;
+    width: 10px;
+    transform: rotate(45deg);
+    position: absolute;
+    left: 10px;
+    top: 15px;
+    color: #FFF;
+}
+.order_cancel {
     border-radius: 5px;
     border: 1px solid rgba(0, 0, 0, 0.2);
-    background-color: #ef4f4f;
-    height: 36px;
-    width: 50px;
+  //  background-color: gray;
+    height: 25px;
+    width: 40px;
     float: right;
-    margin: 2px 10px 2px 0;
-    font-size: 16px;
-    color: #FFFFFF;
+    margin: 2px 6px 2px 0;
+    font-size: 13px;
+    color: graytext;
+    text-align: center;
+    line-height: 25px;
 }
-.title_info {
+.order_occupy {
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background-color: #6FD469;
+    height: 25px;
+    width: 43px;
+    float: right;
+    margin: 2px 6px 2px 0;
+    font-size: 13px;
+    color: #FFFFFF;
+    text-align: center;
+    line-height: 25px;
+}
+.order_over {
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background-color: #208FFC;
+    height: 25px;
+    width: 43px;
+    float: right;
+    margin: 2px 6px 2px 0;
+    font-size: 13px;
+    color: #FFFFFF;
+    text-align: center;
+    line-height: 25px;
+}
+/*.title_info {
     float:left;
     margin-left: 10px;
-}
+}*/
 .btn_day_type_click {
     background-color: #F7F7F7 !important;
 }
@@ -58,6 +106,34 @@ and open the template in the editor.
     right:0; 
     bottom:100px;
     z-index: 5;
+}
+
+/*用户中心样式*/
+.user_header {
+    border-bottom: 10px solid #d9d9d9;
+}
+.user_header p {
+    text-align: center;
+}
+.user_money {
+    float: left;
+    border-top:1px solid #d9d9d9;
+    border-right:1px solid  #d9d9d9; 
+    width: 49%;
+    padding:5px 0;
+}
+.user_money_num{
+    text-align: center;
+    color:#CC9900;
+}
+.user_coupon {
+    float: left;
+    border-top:1px solid #d9d9d9;
+    width: 50%;
+    padding:5px 0;
+}
+.font_15{
+    font-size: 15px;
 }
 
 

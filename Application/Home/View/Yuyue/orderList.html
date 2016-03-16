@@ -12,25 +12,48 @@
 </head>
 <body ontouchstart>
 <div class="title">
-    <div class="title_info">
-        <p>我的预约列表</p>
-    </div>
-    <div style="clear:both;"></div>
-</div> 
+    <a href="javascript:history.back();" class="title_back"> </a>
+    <p style="text-align: center">请选择预约时间</p>
+</div>
 
 <div id="order_list">
     <foreach name="order_list" item="order" >
-        <div class="weui_cell" style="background-color:#d1e5f5;" >
+        <div class="weui_cell" style="background-color:#d1e5f5;" id="div_{$order.order_id}">
             <div class="weui_cell_bd weui_cell_primary">
-                <p><span>{$order.to_date}</span><span style="margin-left: 10px;font-size: 13px;">{$order.day_type_page}<span></p>
-                <p>{$order.park_name}</p>            
-                <p>地址：{$order.address}</p>
+                <div>
+                    <div style="float: left;"><p><span>{$order.to_date}</span><span style="margin-left: 10px;font-size: 13px;">{$order.day_type_page}<span></p></div>                                    
+                    <if condition="$order.state eq 1">
+                        <a class="order_cancel" href="javascript:void(0);" aid="{$order.order_id}">取消</a>
+                    <elseif condition="$order.state eq 2"/>
+                        <a class="order_occupy" href="#">进行中</a>
+                    <elseif condition="$order.state eq 3"/> 
+                        <a class="order_over" href="#">已完成</a>
+                    </if>
+                    <div style="clear: both;"></div>
+                </div>
+                <p style="color: #0000CC;font-weight: bold">{$order.park_name}</p>            
+                <p style="color: gray;font-size: 13px;">地址：{$order.address}</p>
             </div>
         </div>
     </foreach>    
 </div>
 <script type="text/javascript">
+//列表样式    
 $("#order_list .weui_cell:odd").css("background-color", "#FBF9FE");
+//取消订单
+$(".order_cancel").click(function(){
+    url = "{:U('Yuyue/cancelOrder')}";
+    order_id = $(this).attr("aid");
+    $.post(url, {order_id:order_id}, function(data){
+        if(data.state == 1){
+            _success("取消成功！", 1);
+            $("#div_"+order_id).remove();
+        }else{
+            _alert("取消失败", data.msg);
+        }
+    }, 
+    'json');
+});
 </script>    
 </body>
 </html>
